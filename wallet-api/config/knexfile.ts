@@ -18,6 +18,9 @@ export default {
       loadExtensions: [".ts"],
       directory: "../migrations",
     },
+    seeds: {
+      directory: "../seeds",
+    },
   },
 
   production: {
@@ -36,6 +39,9 @@ export default {
       extension: "ts",
       loadExtensions: [".ts"],
       directory: "../migrations",
+    },
+    seeds: {
+      directory: "../seeds",
     },
   },
 }
