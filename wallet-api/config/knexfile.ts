@@ -1,3 +1,5 @@
+// Update with your config settings.
+
 export default {
   development: {
     client: "postgresql",
@@ -12,6 +14,9 @@ export default {
     },
     migrations: {
       tableName: "knex_migrations",
+      extension: "ts",
+      loadExtensions: [".ts"],
+      directory: "../migrations",
     },
   },
 
@@ -28,6 +33,9 @@ export default {
     },
     migrations: {
       tableName: "knex_migrations",
+      extension: "ts",
+      loadExtensions: [".ts"],
+      directory: "../migrations",
     },
   },
 }
