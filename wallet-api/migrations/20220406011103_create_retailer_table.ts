@@ -8,6 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     builder.integer("wallet_id").notNullable()
     builder.foreign("account_id").references("id").inTable("accounts")
     builder.foreign("wallet_id").references("id").inTable("wallets")
+    builder.unique(["account_id", "wallet_id"])
     builder.timestamps(true, true)
   })
 }

@@ -2,7 +2,7 @@ import { Knex } from "knex"
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.alterTable("wallets", builder => {
-    builder.boolean("primary_wallet").defaultTo(false).notNullable()
+    builder.boolean("primary_wallet").defaultTo(true)
   })
 }
 

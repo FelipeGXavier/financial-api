@@ -1,10 +1,11 @@
 import { randomUUID } from "crypto"
 import { Knex } from "knex"
+import { v4 } from "uuid"
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTableIfNotExists("accounts", builder => {
     builder.increments("id").primary()
-    builder.uuid("guid").notNullable().unique().defaultTo(randomUUID())
+    builder.uuid("guid").notNullable().defaultTo(knex.raw("uuid_generate_v4()"))
     builder.string("name", 150).notNullable()
     builder.string("email", 100).notNullable().unique()
     builder.string("password", 150).notNullable()
