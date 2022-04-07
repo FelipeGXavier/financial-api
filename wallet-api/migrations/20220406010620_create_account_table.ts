@@ -1,6 +1,4 @@
-import { randomUUID } from "crypto"
 import { Knex } from "knex"
-import { v4 } from "uuid"
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTableIfNotExists("accounts", builder => {
