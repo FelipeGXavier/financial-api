@@ -1,17 +1,16 @@
-import { Account } from "customer/domain/account"
-import { Amount } from "./vo/amount"
+import { Amount } from "./valueobject/amount"
 
-interface NamedWalletFields {
+export interface NamedWalletFields {
   primaryWallet: boolean
   guid: string
-  account: Account
+  account: number
   amount: Amount
 }
 
 export class Wallet {
   private readonly primaryWallet: boolean
   private readonly guid: string
-  private readonly account: Account
+  private readonly account: number
   private readonly amount: Amount
 
   constructor(parameters: NamedWalletFields) {

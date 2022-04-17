@@ -21,10 +21,6 @@ export class Account {
     this.email = parameters.email
   }
 
-  public fn() {
-    console.log("teste")
-  }
-
   public getId() {
     return this.id
   }

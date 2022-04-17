@@ -1,17 +1,19 @@
-import { Account, NamedAccountFields } from "../src/customer/domain/account"
-
-const env = "development"
-
-import config from "../config/knexfile"
-import knex from "knex"
-
-const connection = knex(config[env])
+import { AccountRepositoryImpl } from "@/customer/infra/persistence/accountRepositoryImpl"
+import { connection } from "@/shared/defaultDatasource"
+import { LoadWalletService } from "@/transaction/application/usecases/loadWalletService"
+import { WalletRepositoryImpl } from "@/transaction/infra/persistence/walletRepository"
+import { request, response } from "express"
+import { WalletController } from "../src/transaction/infra/web/walletController"
 
 async function test() {
-  const accountData = await connection("accounts")
-    .select<NamedAccountFields>("name", "email", "password", "id", "guid")
-    .first()
-  console.log(new Account(accountData as NamedAccountFields).getGuid())
+  const s = new LoadWalletService(
+    new AccountRepositoryImpl(connection),
+    new WalletRepositoryImpl(connection)
+  )
+
+  const c = new WalletController(s)
+
+  console.log(c.loadWallet(request, response))
 }
 
 test()

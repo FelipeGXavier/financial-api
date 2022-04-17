@@ -1,12 +1,16 @@
-const env = "development"
+import { Router } from "express"
+import Server from "./Server"
+import { walletRouter } from "./transaction/infra/web/walletController"
 
-import config from "../config/knexfile"
-import knex from "knex"
+const baseRouter = Router()
 
-const connection = knex(config[env])
+const server = new Server()
 
-async function test() {
-  console.log(await connection.select(connection.raw("1")).first())
-}
+baseRouter.use("/api", walletRouter)
 
-test()
+baseRouter.get("/ping", (req, res) => {
+  return res.send(200)
+})
+
+server.addRouter(baseRouter)
+server.start(3000)
