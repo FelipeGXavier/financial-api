@@ -6,21 +6,10 @@ import { WalletRepositoryImpl } from "@/transaction/infra/persistence/walletRepo
 import { connection } from "@/shared/defaultDatasource"
 import { TransactionRequest } from "./types/transactionRequest"
 
-export const walletRouter = Router()
+export const transactionRouter = Router()
 
-export class WalletController {
+export class TransactionController {
   constructor(private readonly walletService: LoadWallet) {}
-
-  public loadWallet = async (req: Request, res: Response) => {
-    const { id } = req.params
-    const wallet = await this.walletService.loadWalletByAccountId(id)
-    if (wallet.isLeft()) {
-      return res
-        .send({ success: false, message: wallet.value.message })
-        .status(400)
-    }
-    return res.send({ success: true, wallet: wallet.value })
-  }
 
   public transaction = async (req: Request, res: Response) => {
     // @TODO check types
@@ -35,8 +24,6 @@ const s = new LoadWalletService(
   new WalletRepositoryImpl(connection)
 )
 
-const walletController = new WalletController(s)
+const walletController = new TransactionController(s)
 
-walletRouter.get("/wallet", (req, res) => res.send({ ok: true }))
-walletRouter.get("/wallet/:id", walletController.loadWallet)
-walletRouter.post("/wallet/transaction", walletController.transaction)
+transactionRouter.post("/transaction", walletController.transaction)

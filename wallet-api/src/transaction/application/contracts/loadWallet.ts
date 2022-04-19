@@ -1,6 +1,6 @@
 import { Either } from "@/shared/either"
 import { Wallet } from "@/transaction/domain/wallet"
-import { CustomDomainError } from "@/transaction/errors/customError"
+import { CustomDomainError } from "@/shared/errors/customError"
 
 export interface LoadWallet {
   loadWalletByAccountId: (

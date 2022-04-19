@@ -2,8 +2,8 @@ import { Wallet } from "@/transaction/domain/wallet"
 import { LoadWallet } from "@/transaction/application/contracts/loadWallet"
 import { AccountRepository } from "@/customer/infra/contracts/accountRepository"
 import { WalletRepository } from "@/transaction/infra/contracts/walletRepository"
-import { CustomDomainError } from "@/transaction/errors/customError"
 import { Either, left, right } from "@/shared/either"
+import { CustomDomainError } from "@/shared/errors/customError"
 
 export class LoadWalletService implements LoadWallet {
   constructor(
