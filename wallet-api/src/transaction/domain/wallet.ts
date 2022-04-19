@@ -24,16 +24,17 @@ export class Wallet {
   }
 
   public deposit(
-    amount: Amount,
+    depositValue: Amount,
     payeeWallet: Wallet
   ): Either<CustomDomainError, PayeePayerNewWallet> {
-    if (this.amountExchangeIsAvailable(amount)) {
+    if (this.amountExchangeIsAvailable(depositValue)) {
       const resultPayerAmount = Amount.of(
-        this.amount.getAmount() - amount.getAmount()
+        this.getValue() - depositValue.getAmount()
       )
       const resultPayeeAmount = Amount.of(
-        payeeWallet.amount.getAmount() + amount.getAmount()
+        payeeWallet.getValue() + depositValue.getAmount()
       )
+      // Avoid side effects creating new wallet instances as result
       const resultPayerWallet = new Wallet({
         primaryWallet: this.primaryWallet,
         guid: this.guid,
@@ -42,7 +43,7 @@ export class Wallet {
       })
       const resultPayeeWallet = new Wallet({
         primaryWallet: this.primaryWallet,
-        guid: this.guid,
+        guid: payeeWallet.getGuid(),
         account: this.account,
         amount: resultPayeeAmount,
       })
@@ -57,5 +58,13 @@ export class Wallet {
 
   public amountExchangeIsAvailable(amountExchange: Amount) {
     return this.amount.getAmount() >= amountExchange.getAmount()
+  }
+
+  public getValue(): number {
+    return this.amount.getAmount()
+  }
+
+  public getGuid(): string {
+    return this.guid
   }
 }
