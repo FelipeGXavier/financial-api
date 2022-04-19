@@ -13,7 +13,12 @@ export class WalletController {
   public loadWallet = async (req: Request, res: Response) => {
     const { id } = req.params
     const wallet = await this.walletService.loadWalletByAccountId(id)
-    return res.send({ result: wallet })
+    if (wallet.isLeft()) {
+      return res
+        .send({ success: false, message: wallet.value.message })
+        .status(400)
+    }
+    return res.send({ success: true, wallet: wallet.value })
   }
 }
 
