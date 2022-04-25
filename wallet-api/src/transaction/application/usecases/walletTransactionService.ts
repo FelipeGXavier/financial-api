@@ -4,9 +4,7 @@ import { WalletRepository } from "@/transaction/infra/contracts/walletRepository
 import { Either, left, right } from "@/shared/either"
 import { CustomDomainError } from "@/shared/errors/customError"
 import { Amount } from "@/transaction/domain/valueobject/amount"
-import { connection } from "@/shared/defaultDatasource"
-import { Knex } from "knex"
-import { promisify } from "@/shared/promisfy"
+import { databaseTransactionCtx } from "@/shared/defaultDatasource"
 import { Wallet } from "@/transaction/domain/wallet"
 
 export class WalletTransactionService implements WalletTransaction {
@@ -24,10 +22,8 @@ export class WalletTransactionService implements WalletTransaction {
       walletsOrError.payee
     )
     if (transactionResult.isRight()) {
-      // Database transaction context
-      const transactionCtx = (await promisify(
-        connection.transaction.bind(connection)
-      )) as Knex.Transaction
+      // Retrieve database transaction context
+      const transactionCtx = await databaseTransactionCtx()
       try {
         const updatedWallets = transactionResult.value
         const savePayerWallet = await this.walletRepository.updateWalletAmount(
@@ -77,6 +73,6 @@ export class WalletTransactionService implements WalletTransaction {
     if (!payeeWallet) {
       return new CustomDomainError("Payee wallet not found")
     }
-    return { payer: payeeWallet, payee: payeeWallet }
+    return { payer: payerWallet, payee: payeeWallet }
   }
 }

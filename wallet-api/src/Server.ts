@@ -9,8 +9,10 @@ export default class Server {
     this.app = server
   }
 
-  start(port: number): void {
-    this.app.listen(port)
+  start(port: number): Promise<unknown> {
+    return new Promise(resolve => {
+      resolve(this.app.listen(port))
+    })
   }
 
   addRouter(
