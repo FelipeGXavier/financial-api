@@ -33,6 +33,7 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "express": "^4.17.3",
+    "express-async-handler": "^1.2.0",
     "knex": "^0.95.14",
     "pg": "^8.7.3"
   }

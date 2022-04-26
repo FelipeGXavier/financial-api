@@ -5,6 +5,7 @@ import { AccountRepositoryImpl } from "@/customer/infra/persistence/accountRepos
 import { WalletRepositoryImpl } from "@/transaction/infra/persistence/walletRepository"
 import { connection } from "@/shared/defaultDatasource"
 import { TransactionRequest } from "./types/transactionRequest"
+import asyncHandler from "express-async-handler"
 
 export const walletRouter = Router()
 
@@ -15,18 +16,9 @@ export class WalletController {
     const { id } = req.params
     const wallet = await this.walletService.loadWalletByAccountId(id)
     if (wallet.isLeft()) {
-      return res
-        .send({ success: false, message: wallet.value.message })
-        .status(400)
+      res.send({ success: false, message: wallet.value.message }).status(400)
     }
-    return res.send({ success: true, wallet: wallet.value })
-  }
-
-  public transaction = async (req: Request, res: Response) => {
-    // @TODO check types
-    const transactionRequest: TransactionRequest = req.body
-
-    return res.sendStatus(200)
+    res.send({ success: true, wallet: wallet.value })
   }
 }
 
@@ -37,6 +29,4 @@ const s = new LoadWalletService(
 
 const walletController = new WalletController(s)
 
-walletRouter.get("/wallet", (req, res) => res.send({ ok: true }))
-walletRouter.get("/wallet/:id", walletController.loadWallet)
-walletRouter.post("/wallet/transaction", walletController.transaction)
+walletRouter.get("/wallet/:id", asyncHandler(walletController.loadWallet))
