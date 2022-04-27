@@ -1,7 +1,10 @@
 import { Request, Router, Response, NextFunction } from "express"
 import { WalletRepositoryImpl } from "@/transaction/infra/persistence/walletRepository"
 import { connection } from "@/shared/defaultDatasource"
-import { TransactionRequest } from "./types/transactionRequest"
+import {
+  TransactionRequest,
+  TransactionRequestSchema,
+} from "./types/transactionRequest"
 import { WalletTransactionService } from "@/transaction/application/usecases/walletTransactionService"
 import asyncHandler from "express-async-handler"
 
@@ -11,8 +14,13 @@ export class TransactionController {
   constructor(private readonly transactionService: WalletTransactionService) {}
 
   public transaction = async (req: Request, res: Response) => {
-    // @TODO check types
     const transactionRequest: TransactionRequest = req.body
+    if (!(await TransactionRequestSchema.isValid(transactionRequest))) {
+      res
+        .status(400)
+        .json({ sucess: false, message: "Invalid transaction parameters" })
+      return
+    }
     const result = await this.transactionService.walletTransaction(
       transactionRequest
     )
