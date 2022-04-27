@@ -6,6 +6,8 @@ import { CustomDomainError } from "@/shared/errors/customError"
 import { Amount } from "@/transaction/domain/valueobject/amount"
 import { databaseTransactionCtx } from "@/shared/defaultDatasource"
 import { Wallet } from "@/transaction/domain/wallet"
+import { PayeePayerNewWallet } from "@/transaction/domain/wallet"
+import { Knex } from "knex"
 
 export class WalletTransactionService implements WalletTransaction {
   constructor(private readonly walletRepository: WalletRepository) {}
@@ -26,23 +28,14 @@ export class WalletTransactionService implements WalletTransaction {
       const transactionCtx = await databaseTransactionCtx()
       try {
         const updatedWallets = transactionResult.value
-        const savePayerWallet = await this.walletRepository.updateWalletAmount(
-          updatedWallets[0],
-          transactionCtx
-        )
-        const savePayeeWallet = await this.walletRepository.updateWalletAmount(
-          updatedWallets[1],
-          transactionCtx
-        )
-        if (savePayeeWallet && savePayerWallet) {
+        if (await this.saveWallets(updatedWallets, transactionCtx)) {
           transactionCtx.commit()
           return right(true)
-        } else {
-          transactionCtx.rollback()
-          return left(
-            new CustomDomainError("An error occurred while updating wallets")
-          )
         }
+        transactionCtx.rollback()
+        return left(
+          new CustomDomainError("An error occurred while updating wallets")
+        )
       } catch (err) {
         console.log(err)
         transactionCtx.rollback()
@@ -74,5 +67,23 @@ export class WalletTransactionService implements WalletTransaction {
       return new CustomDomainError("Payee wallet not found")
     }
     return { payer: payerWallet, payee: payeeWallet }
+  }
+
+  private async saveWallets(
+    wallets: PayeePayerNewWallet,
+    transactionCtx: Knex.Transaction
+  ) {
+    const savePayerWallet = await this.walletRepository.updateWalletAmount(
+      wallets[0],
+      transactionCtx
+    )
+    const savePayeeWallet = await this.walletRepository.updateWalletAmount(
+      wallets[1],
+      transactionCtx
+    )
+    if (savePayeeWallet && savePayerWallet) {
+      return true
+    }
+    return false
   }
 }
