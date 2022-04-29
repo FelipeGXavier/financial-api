@@ -8,6 +8,7 @@ import { databaseTransactionCtx } from "@/shared/defaultDatasource"
 import { Wallet } from "@/transaction/domain/wallet"
 import { PayeePayerNewWallet } from "@/transaction/domain/wallet"
 import { Knex } from "knex"
+import { TransactionState } from "../../domain/transactionState"
 
 export class WalletTransactionService implements WalletTransaction {
   constructor(private readonly walletRepository: WalletRepository) {}
@@ -43,7 +44,7 @@ export class WalletTransactionService implements WalletTransaction {
         if (await this.saveWallets(updatedWallets, transactionCtx)) {
           await this.walletRepository.updateWalletTransactionState(
             transactionId,
-            "finished"
+            TransactionState.Finished
           )
           transactionCtx.commit()
           return right(true)
@@ -59,7 +60,7 @@ export class WalletTransactionService implements WalletTransaction {
     }
     await this.walletRepository.updateWalletTransactionState(
       transactionId,
-      "failed"
+      TransactionState.Failed
     )
     return left(new CustomDomainError(errorMessage))
   }

@@ -2,6 +2,7 @@ import { Wallet } from "@/transaction/domain/wallet"
 import { WalletRepository } from "@/transaction/infra/contracts/walletRepository"
 import { Knex } from "knex"
 import { Amount } from "@/transaction/domain/valueobject/amount"
+import { TransactionState } from "../../domain/transactionState"
 
 export class WalletRepositoryImpl implements WalletRepository {
   private readonly table = "wallets"
@@ -78,7 +79,7 @@ export class WalletRepositoryImpl implements WalletRepository {
       await this.connection("wallet_transactions")
         .insert({
           amount,
-          state: "pending",
+          state: TransactionState.Pending,
           payer_wallet_id: payerId,
           payee_wallet_id: payeeId,
         })
@@ -88,7 +89,7 @@ export class WalletRepositoryImpl implements WalletRepository {
 
   async updateWalletTransactionState(
     transactionId: number,
-    state: string,
+    state: TransactionState,
     trx?: Knex.Transaction
   ): Promise<void> {
     if (trx != null && trx != undefined) {

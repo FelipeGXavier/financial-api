@@ -1,5 +1,6 @@
 import { Wallet } from "@/transaction/domain/wallet"
 import { Knex } from "knex"
+import { TransactionState } from "../../domain/transactionState"
 
 export interface WalletRepository {
   findPrimaryWalletByAccountId: (accountId: number) => Promise<Wallet | null>
@@ -18,7 +19,7 @@ export interface WalletRepository {
   ) => Promise<number | undefined>
   updateWalletTransactionState: (
     transactionId: number,
-    state: string,
+    state: TransactionState,
     trx?: Knex.Transaction
   ) => Promise<void>
 }
