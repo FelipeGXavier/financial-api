@@ -3,6 +3,7 @@ import { right, left, Either } from "@/shared/either"
 import { CustomDomainError } from "@/shared/errors/customError"
 
 export interface NamedWalletFields {
+  id: number
   primaryWallet: boolean
   guid: string
   account: number
@@ -11,6 +12,7 @@ export interface NamedWalletFields {
 
 export type PayeePayerNewWallet = [payer: Wallet, payee: Wallet]
 export class Wallet {
+  private readonly id: number
   private readonly primaryWallet: boolean
   private readonly guid: string
   private readonly account: number
@@ -21,6 +23,7 @@ export class Wallet {
     this.guid = parameters.guid
     this.account = parameters.account
     this.amount = parameters.amount
+    this.id = parameters.id
   }
 
   public deposit(
@@ -40,12 +43,14 @@ export class Wallet {
         guid: this.guid,
         account: this.account,
         amount: resultPayerAmount,
+        id: this.getId(),
       })
       const resultPayeeWallet = new Wallet({
         primaryWallet: this.primaryWallet,
         guid: payeeWallet.getGuid(),
         account: this.account,
         amount: resultPayeeAmount,
+        id: payeeWallet.getId(),
       })
       return right([resultPayerWallet, resultPayeeWallet])
     }
@@ -66,5 +71,9 @@ export class Wallet {
 
   public getGuid(): string {
     return this.guid
+  }
+
+  public getId(): number {
+    return this.id
   }
 }

@@ -12,12 +12,13 @@ export class WalletRepositoryImpl implements WalletRepository {
     accountId: number
   ): Promise<Wallet | null> {
     const walletContent = await this.connection(this.table)
-      .select("guid", "amount", "account_id", "primary_wallet")
+      .select("id", "guid", "amount", "account_id", "primary_wallet")
       .where("account_id", accountId)
       .andWhere("primary_wallet", true)
       .first()
     if (walletContent) {
       return new Wallet({
+        id: walletContent.id,
         guid: walletContent.guid,
         account: walletContent.account_id,
         amount: Amount.of(parseInt(walletContent.amount)),
@@ -37,12 +38,13 @@ export class WalletRepositoryImpl implements WalletRepository {
       return null
     }
     const walletContent = await this.connection(this.table)
-      .select("guid", "amount", "account_id", "primary_wallet")
+      .select("id", "guid", "amount", "account_id", "primary_wallet")
       .where("account_id", userId)
       .andWhere("primary_wallet", true)
       .first()
     if (walletContent) {
       return new Wallet({
+        id: walletContent.id,
         guid: walletContent.guid,
         account: walletContent.account_id,
         amount: Amount.of(parseInt(walletContent.amount)),
@@ -64,5 +66,39 @@ export class WalletRepositoryImpl implements WalletRepository {
         .where("guid", wallet.getGuid())
     }
     return Promise.reject(0)
+  }
+
+  async saveWalletTransactionRegister(
+    amount: number,
+    payerId: number,
+    payeeId: number,
+    trx?: Knex.Transaction
+  ): Promise<number | undefined> {
+    return (
+      await this.connection("wallet_transactions")
+        .insert({
+          amount,
+          state: "pending",
+          payer_wallet_id: payerId,
+          payee_wallet_id: payeeId,
+        })
+        .returning("id")
+    )[0] as number
+  }
+
+  async updateWalletTransactionState(
+    transactionId: number,
+    state: string,
+    trx?: Knex.Transaction
+  ): Promise<void> {
+    if (trx != null && trx != undefined) {
+      await trx("wallet_transactions")
+        .update({ state })
+        .where("id", transactionId)
+    } else {
+      await this.connection("wallet_transactions")
+        .update({ state })
+        .where("id", transactionId)
+    }
   }
 }

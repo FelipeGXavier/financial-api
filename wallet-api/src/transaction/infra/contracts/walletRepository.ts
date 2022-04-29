@@ -10,4 +10,15 @@ export interface WalletRepository {
     wallet: Wallet,
     ctx?: Knex.Transaction
   ) => Promise<number>
+  saveWalletTransactionRegister: (
+    amount: number,
+    payerId: number,
+    payeeId: number,
+    trx?: Knex.Transaction
+  ) => Promise<number | undefined>
+  updateWalletTransactionState: (
+    transactionId: number,
+    state: string,
+    trx?: Knex.Transaction
+  ) => Promise<void>
 }

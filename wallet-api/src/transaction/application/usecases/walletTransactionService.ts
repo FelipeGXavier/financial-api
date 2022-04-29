@@ -19,34 +19,49 @@ export class WalletTransactionService implements WalletTransaction {
     if (walletsOrError instanceof CustomDomainError) {
       return left(walletsOrError)
     }
+    const transactionId =
+      await this.walletRepository.saveWalletTransactionRegister(
+        Amount.of(transaction.value).getAmount(),
+        walletsOrError.payer.getId(),
+        walletsOrError.payee.getId()
+      )
+    if (!transactionId) {
+      return left(
+        new CustomDomainError("Error while starting transaction process")
+      )
+    }
     const transactionResult = walletsOrError.payer.deposit(
       Amount.of(transaction.value),
       walletsOrError.payee
     )
+    let errorMessage = ""
     if (transactionResult.isRight()) {
       // Retrieve database transaction context
       const transactionCtx = await databaseTransactionCtx()
       try {
         const updatedWallets = transactionResult.value
         if (await this.saveWallets(updatedWallets, transactionCtx)) {
+          await this.walletRepository.updateWalletTransactionState(
+            transactionId,
+            "finished"
+          )
           transactionCtx.commit()
           return right(true)
         }
         transactionCtx.rollback()
-        return left(
-          new CustomDomainError("An error occurred while updating wallets")
-        )
+        errorMessage = "An error occurred while updating wallets"
       } catch (err) {
-        console.log(err)
+        errorMessage = "An internal error occurred while handling wallet"
         transactionCtx.rollback()
-        return left(
-          new CustomDomainError(
-            "An internal error occurred while handling wallets"
-          )
-        )
       }
+    } else {
+      errorMessage = transactionResult.value.message
     }
-    return left(transactionResult.value)
+    await this.walletRepository.updateWalletTransactionState(
+      transactionId,
+      "failed"
+    )
+    return left(new CustomDomainError(errorMessage))
   }
 
   private async loadTransactionWallets(
