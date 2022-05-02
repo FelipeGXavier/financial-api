@@ -8,7 +8,8 @@ import { databaseTransactionCtx } from "@/shared/defaultDatasource"
 import { Wallet } from "@/transaction/domain/wallet"
 import { PayeePayerNewWallet } from "@/transaction/domain/wallet"
 import { Knex } from "knex"
-import { TransactionState } from "../../domain/transactionState"
+import { TransactionState } from "@/transaction/domain/transactionState"
+import { isCustomError } from "@/shared/util"
 
 export class WalletTransactionService implements WalletTransaction {
   constructor(private readonly walletRepository: WalletRepository) {}
@@ -17,7 +18,7 @@ export class WalletTransactionService implements WalletTransaction {
     transaction: TransactionRequest
   ): Promise<Either<CustomDomainError, true>> {
     const walletsOrError = await this.loadTransactionWallets(transaction)
-    if (walletsOrError instanceof CustomDomainError) {
+    if (isCustomError(walletsOrError)) {
       return left(walletsOrError)
     }
     const transactionId =
@@ -39,7 +40,7 @@ export class WalletTransactionService implements WalletTransaction {
       transactionResult,
       transactionId
     )
-    if (transactionInsert instanceof CustomDomainError) {
+    if (isCustomError(transactionInsert)) {
       await this.walletRepository.updateWalletTransactionState(
         transactionId,
         TransactionState.Failed
