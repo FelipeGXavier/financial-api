@@ -35,6 +35,24 @@ export class WalletTransactionService implements WalletTransaction {
       Amount.of(transaction.value),
       walletsOrError.payee
     )
+    const transactionInsert = await this.handleTransaction(
+      transactionResult,
+      transactionId
+    )
+    if (transactionInsert instanceof CustomDomainError) {
+      await this.walletRepository.updateWalletTransactionState(
+        transactionId,
+        TransactionState.Failed
+      )
+      return left(transactionInsert)
+    }
+    return right(true)
+  }
+
+  private async handleTransaction(
+    transactionResult: Either<CustomDomainError, PayeePayerNewWallet>,
+    transactionId: number
+  ): Promise<true | CustomDomainError> {
     let errorMessage = ""
     if (transactionResult.isRight()) {
       // Retrieve database transaction context
@@ -47,7 +65,7 @@ export class WalletTransactionService implements WalletTransaction {
             TransactionState.Finished
           )
           transactionCtx.commit()
-          return right(true)
+          return true
         }
         transactionCtx.rollback()
         errorMessage = "An error occurred while updating wallets"
@@ -58,11 +76,7 @@ export class WalletTransactionService implements WalletTransaction {
     } else {
       errorMessage = transactionResult.value.message
     }
-    await this.walletRepository.updateWalletTransactionState(
-      transactionId,
-      TransactionState.Failed
-    )
-    return left(new CustomDomainError(errorMessage))
+    return new CustomDomainError(errorMessage)
   }
 
   private async loadTransactionWallets(
