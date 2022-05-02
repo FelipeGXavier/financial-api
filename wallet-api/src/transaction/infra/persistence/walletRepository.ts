@@ -13,7 +13,26 @@ export class WalletRepositoryImpl implements WalletRepository {
     accountId: number
   ): Promise<Wallet | null> {
     const walletContent = await this.connection(this.table)
-      .select("id", "guid", "amount", "account_id", "primary_wallet")
+      .select(
+        "id",
+        "guid",
+        "amount",
+        "account_id",
+        "primary_wallet",
+        this.connection.raw(`
+      (CASE 
+        WHEN (
+        SELECT
+          count(*)
+        FROM
+          retailers r
+        WHERE
+          r.id = wallets.account_id
+        ) > 0 THEN 'retailer'
+        ELSE 'user'
+      END) AS "account_type"`)
+      )
+      .innerJoin("accounts", "wallets.account_id", "=", "accounts.id")
       .where("account_id", accountId)
       .andWhere("primary_wallet", true)
       .first()
@@ -24,6 +43,7 @@ export class WalletRepositoryImpl implements WalletRepository {
         account: walletContent.account_id,
         amount: Amount.of(parseInt(walletContent.amount)),
         primaryWallet: true,
+        accountType: walletContent.account_type,
       })
     }
     return null
@@ -39,7 +59,26 @@ export class WalletRepositoryImpl implements WalletRepository {
       return null
     }
     const walletContent = await this.connection(this.table)
-      .select("id", "guid", "amount", "account_id", "primary_wallet")
+      .select(
+        "wallets.id",
+        "wallets.guid",
+        "wallets.amount",
+        "wallets.account_id",
+        "wallets.primary_wallet",
+        this.connection.raw(`
+      (CASE 
+        WHEN (
+        SELECT
+          count(*)
+        FROM
+          retailers
+        WHERE
+          retailers.id = wallets.account_id
+        ) > 0 THEN 'retailer'
+        ELSE 'user'
+      END) AS "account_type"`)
+      )
+      .innerJoin("accounts", "wallets.account_id", "=", "accounts.id")
       .where("account_id", userId)
       .andWhere("primary_wallet", true)
       .first()
@@ -50,6 +89,7 @@ export class WalletRepositoryImpl implements WalletRepository {
         account: walletContent.account_id,
         amount: Amount.of(parseInt(walletContent.amount)),
         primaryWallet: true,
+        accountType: walletContent.account_type,
       })
     }
     return null

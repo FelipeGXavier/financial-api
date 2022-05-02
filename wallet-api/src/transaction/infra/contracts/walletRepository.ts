@@ -1,6 +1,6 @@
 import { Wallet } from "@/transaction/domain/wallet"
 import { Knex } from "knex"
-import { TransactionState } from "../../domain/transactionState"
+import { TransactionState } from "@/transaction/domain/transactionState"
 
 export interface WalletRepository {
   findPrimaryWalletByAccountId: (accountId: number) => Promise<Wallet | null>

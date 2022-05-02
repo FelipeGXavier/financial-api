@@ -1,6 +1,7 @@
 import { Amount } from "./valueobject/amount"
 import { right, left, Either } from "@/shared/either"
 import { CustomDomainError } from "@/shared/errors/customError"
+import { AccountType } from "@/customer/domain/accountType"
 
 export interface NamedWalletFields {
   id: number
@@ -8,6 +9,7 @@ export interface NamedWalletFields {
   guid: string
   account: number
   amount: Amount
+  accountType: AccountType
 }
 
 export type PayeePayerNewWallet = [payer: Wallet, payee: Wallet]
@@ -17,6 +19,7 @@ export class Wallet {
   private readonly guid: string
   private readonly account: number
   private readonly amount: Amount
+  private readonly accountType: AccountType
 
   constructor(parameters: NamedWalletFields) {
     this.primaryWallet = parameters.primaryWallet
@@ -24,6 +27,7 @@ export class Wallet {
     this.account = parameters.account
     this.amount = parameters.amount
     this.id = parameters.id
+    this.accountType = parameters.accountType
   }
 
   public deposit(
@@ -44,6 +48,7 @@ export class Wallet {
         account: this.account,
         amount: resultPayerAmount,
         id: this.getId(),
+        accountType: this.accountType,
       })
       const resultPayeeWallet = new Wallet({
         primaryWallet: this.primaryWallet,
@@ -51,6 +56,7 @@ export class Wallet {
         account: this.account,
         amount: resultPayeeAmount,
         id: payeeWallet.getId(),
+        accountType: payeeWallet.accountType,
       })
       return right([resultPayerWallet, resultPayeeWallet])
     }
@@ -75,5 +81,13 @@ export class Wallet {
 
   public getId(): number {
     return this.id
+  }
+
+  public walletOwnerIsRetailer(): boolean {
+    return this.accountType == AccountType.Retailer
+  }
+
+  public walletOwnerIsUser(): boolean {
+    return this.accountType == AccountType.User
   }
 }

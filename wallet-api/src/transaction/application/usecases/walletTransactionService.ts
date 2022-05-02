@@ -103,7 +103,7 @@ export class WalletTransactionService implements WalletTransaction {
   private async saveWallets(
     wallets: PayeePayerNewWallet,
     transactionCtx: Knex.Transaction
-  ) {
+  ): Promise<boolean> {
     const savePayerWallet = await this.walletRepository.updateWalletAmount(
       wallets[0],
       transactionCtx
