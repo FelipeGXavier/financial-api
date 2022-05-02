@@ -97,6 +97,9 @@ export class WalletTransactionService implements WalletTransaction {
     if (!payeeWallet) {
       return new CustomDomainError("Payee wallet not found")
     }
+    if (payerWallet.walletOwnerIsRetailer()) {
+      return new CustomDomainError("Payer must not be a retailer")
+    }
     return { payer: payerWallet, payee: payeeWallet }
   }
 
