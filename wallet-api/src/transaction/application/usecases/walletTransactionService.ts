@@ -10,6 +10,8 @@ import { PayeePayerNewWallet } from "@/transaction/domain/wallet"
 import { Knex } from "knex"
 import { TransactionState } from "@/transaction/domain/transactionState"
 import { isCustomError } from "@/shared/util"
+import { FraudCheckService } from "@/transaction/infra/service/fraudCheckServiceMock"
+import { SendTransactionMessage } from "@/transaction/infra/service/sendTransactionMessageMock"
 
 export class WalletTransactionService implements WalletTransaction {
   constructor(private readonly walletRepository: WalletRepository) {}
@@ -32,6 +34,9 @@ export class WalletTransactionService implements WalletTransaction {
         new CustomDomainError("Error while starting transaction process")
       )
     }
+    if (isCustomError(await this.isValidTransaction(transactionId))) {
+      return left(new CustomDomainError("Transaction was rejected"))
+    }
     const transactionResult = walletsOrError.payer.deposit(
       Amount.of(transaction.value),
       walletsOrError.payee
@@ -47,6 +52,7 @@ export class WalletTransactionService implements WalletTransaction {
       )
       return left(transactionInsert)
     }
+    new SendTransactionMessage().sendMessage(transactionId)
     return right(true)
   }
 
@@ -78,6 +84,20 @@ export class WalletTransactionService implements WalletTransaction {
       errorMessage = transactionResult.value.message
     }
     return new CustomDomainError(errorMessage)
+  }
+
+  private async isValidTransaction(
+    transactionId: number
+  ): Promise<void | false> {
+    const fraudService = new FraudCheckService()
+    const result = await fraudService.checkTransaction()
+    if (!result) {
+      await this.walletRepository.updateWalletTransactionState(
+        transactionId,
+        TransactionState.Rejected
+      )
+      return false
+    }
   }
 
   private async loadTransactionWallets(
