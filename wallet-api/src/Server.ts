@@ -16,7 +16,7 @@ export default class Server {
   }
 
   addRouter(
-    router: express.Router,
+    router: express.Router | any,
     prefix?: string,
     ...middlewares: RequestHandler[]
   ): Server {
