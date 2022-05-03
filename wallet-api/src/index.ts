@@ -4,7 +4,6 @@ import { walletRouter } from "./transaction/infra/web/walletController"
 import { transactionRouter } from "./transaction/infra/web/transactionController"
 import errorHandler from "./shared/errors/errorHandler"
 import morganMiddleware from "./config/requestLogger"
-import Logger from "@/shared/logger"
 
 const baseRouter = Router()
 const server = new Server()

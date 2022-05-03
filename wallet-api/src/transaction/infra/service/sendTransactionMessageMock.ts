@@ -1,4 +1,5 @@
 import axios from "axios"
+import Logger from "@/shared/logger"
 
 type ServiceResponse = {
   message: string
@@ -18,14 +19,14 @@ export class SendTransactionMessage {
         response.message &&
         response.message.toLocaleLowerCase() == "success"
       ) {
-        console.log(`Message succesfully sent to transaction #${transactionId}`)
+        Logger.info(`Message succesfully sent to transaction #${transactionId}`)
       } else {
-        console.log(
+        Logger.warn(
           `Notify service wasn't sucessfully to send transaction message #${transactionId}`
         )
       }
     } catch (err) {
-      console.error(
+      Logger.error(
         `Error ocurred while sending request to notify transaction success #${transactionId}`,
         err
       )

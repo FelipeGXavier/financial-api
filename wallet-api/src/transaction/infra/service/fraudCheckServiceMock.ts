@@ -1,4 +1,5 @@
 import axios from "axios"
+import Logger from "@/shared/logger"
 
 type ServiceResponse = {
   message: string
@@ -22,7 +23,7 @@ export class FraudCheckService {
       }
       return false
     } catch (err) {
-      console.error(err)
+      Logger.error(`Error while requesting external fraud service`, err)
       return false
     }
   }
