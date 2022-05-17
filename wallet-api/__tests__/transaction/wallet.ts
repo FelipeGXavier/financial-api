@@ -5,7 +5,7 @@ import { CustomDomainError } from "@/shared/errors/customError"
 import { builderWalletUserType } from "../fixture/builderFixture"
 
 describe("Wallet entity", () => {
-  test("wallet owner type", () => {
+  test("Wallet owner type match own state", () => {
     const retailer = builderWalletUserType(AccountType.Retailer, 1, 1)
     const user = builderWalletUserType(AccountType.User, 1, 1)
     expect(retailer.walletOwnerIsRetailer()).toBeTruthy()
@@ -14,20 +14,20 @@ describe("Wallet entity", () => {
     expect(user.walletOwnerIsRetailer()).toBeFalsy()
   })
 
-  test("wallet amount", () => {
+  test("Wallet amount to exchange match own state", () => {
     const wallet = builderWalletUserType(AccountType.User, 1, 1, true, 10)
     expect(wallet.amountExchangeIsAvailable(Amount.of(9))).toBeTruthy()
     expect(wallet.amountExchangeIsAvailable(Amount.of(10))).toBeTruthy()
     expect(wallet.amountExchangeIsAvailable(Amount.of(11))).toBeFalsy()
   })
 
-  test("wallet invalid amount", () => {
+  test("Wallet invalid amount should throw an error", () => {
     expect(() =>
       builderWalletUserType(AccountType.User, 1, 1, true, -1)
     ).toThrow("Illegal amount value")
   })
 
-  test("deposit without necessary amount", () => {
+  test("Deposit without necessary amount should return error", () => {
     const payer = builderWalletUserType(AccountType.User, 1, 1, true, 10)
     const payee = builderWalletUserType(AccountType.Retailer, 2, 2, true, 0)
     const result = payer.deposit(Amount.of(11), payee)
@@ -39,7 +39,7 @@ describe("Wallet entity", () => {
     )
   })
 
-  test("deposit amount", () => {
+  test("Wallet deposit amount", () => {
     const payer = builderWalletUserType(AccountType.User, 1, 1, true, 10)
     const payee = builderWalletUserType(AccountType.Retailer, 2, 2, true, 1)
     const deposit = payer.deposit(Amount.of(10), payee)
@@ -62,7 +62,7 @@ describe("Wallet entity", () => {
     )
   })
 
-  test("deposit must not mutate input wallets", () => {
+  test("Wallet deposit must not mutate input", () => {
     const payer = builderWalletUserType(AccountType.User, 1, 1, true, 99)
     const payerCopy = structuredClone(payer)
     const payee = builderWalletUserType(AccountType.Retailer, 2, 2, true, 1)

@@ -73,6 +73,43 @@ describe("TransactionService", () => {
       new CustomDomainError("Payer must not be a retailer")
     )
   })
+
+  test("Error while starting transaction should return error", async () => {
+    const payerGuid = randomUUID()
+    const payeeGuid = randomUUID()
+    setupMockFindWalletMethod(
+      payerGuid,
+      Promise.resolve(builderWalletUserType(AccountType.User, 1, 1))
+    )
+    setupMockFindWalletMethod(
+      payeeGuid,
+      Promise.resolve(builderWalletUserType(AccountType.Retailer, 2, 2))
+    )
+    const input = {
+      value: 1,
+      payer: payerGuid,
+      payee: payeeGuid,
+    }
+    mockWalletRepository.saveWalletTransactionRegister
+      .calledWith(input.value, 1, 2)
+      .mockReturnValue(Promise.resolve(undefined))
+    const result = await transactionService.walletTransaction(input)
+    expect(result.isLeft()).toBeTruthy()
+    expect(result.value).toEqual(
+      new CustomDomainError("Error while starting transaction process")
+    )
+
+    expect(mockWalletRepository.saveWalletTransactionRegister).toBeCalledTimes(
+      1
+    )
+    expect(mockWalletRepository.saveWalletTransactionRegister).toBeCalledWith(
+      1,
+      1,
+      2
+    )
+  })
+
+  test("Transaction rejected", () => {})
 })
 
 const setupMockFindWalletMethod = (
