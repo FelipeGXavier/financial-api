@@ -1,8 +1,8 @@
 import { Amount } from "@/transaction/domain/valueobject/amount"
-import { randomUUID } from "crypto"
 import { PayeePayerNewWallet, Wallet } from "@/transaction/domain/wallet"
 import { AccountType } from "@/customer/domain/accountType"
 import { CustomDomainError } from "@/shared/errors/customError"
+import { builderWalletUserType } from "../fixture/builderFixture"
 
 describe("Wallet entity", () => {
   test("wallet owner type", () => {
@@ -72,21 +72,3 @@ describe("Wallet entity", () => {
     expect(payee).toEqual(payeeCopy)
   })
 })
-
-const builderWalletUserType = (
-  type: AccountType,
-  id: number,
-  account: number,
-  primary: boolean = true,
-  amount: number = 0,
-  guid: string = randomUUID()
-) => {
-  return new Wallet({
-    account,
-    accountType: type,
-    guid,
-    primaryWallet: primary,
-    amount: Amount.of(amount),
-    id,
-  })
-}

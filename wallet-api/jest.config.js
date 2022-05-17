@@ -9,4 +9,5 @@ module.exports = {
   modulePaths: ['<rootDir>'],
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
   testEnvironment: 'node',
+  modulePathIgnorePatterns: ['fixture/']
 };
