@@ -53,7 +53,7 @@ export class Wallet {
       const resultPayeeWallet = new Wallet({
         primaryWallet: this.primaryWallet,
         guid: payeeWallet.getGuid(),
-        account: this.account,
+        account: payeeWallet.account,
         amount: resultPayeeAmount,
         id: payeeWallet.getId(),
         accountType: payeeWallet.accountType,
