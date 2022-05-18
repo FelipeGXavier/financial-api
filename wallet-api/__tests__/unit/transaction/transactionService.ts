@@ -3,11 +3,11 @@ import { WalletRepository } from "@/transaction/infra/contracts/walletRepository
 import { WalletTransactionService } from "@/transaction/application/usecases/walletTransactionService"
 import { randomUUID } from "crypto"
 import { CustomDomainError } from "@/shared/errors/customError"
-import { builderWalletUserType } from "../fixture/builderFixture"
 import { AccountType } from "@/customer/domain/accountType"
 import { Wallet } from "@/transaction/domain/wallet"
 import { FraudCheckService } from "@/transaction/infra/service/fraudCheckServiceMock"
 import { SendTransactionMessage } from "@/transaction/infra/service/sendTransactionMessageMock"
+import { builderWalletUserType } from "__tests__/fixture/builderFixture"
 
 // Mocks
 const mockWalletRepository = mock<WalletRepository>()
