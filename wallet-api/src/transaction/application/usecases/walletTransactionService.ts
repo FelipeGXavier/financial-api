@@ -15,7 +15,11 @@ import { SendTransactionMessage } from "@/transaction/infra/service/sendTransact
 import Logger from "@/shared/logger"
 
 export class WalletTransactionService implements WalletTransaction {
-  constructor(private readonly walletRepository: WalletRepository) {}
+  constructor(
+    private readonly walletRepository: WalletRepository,
+    private readonly sendTransactionMessage: SendTransactionMessage,
+    private readonly transactionValidionService: FraudCheckService
+  ) {}
 
   public async walletTransaction(
     transaction: TransactionRequest
@@ -36,7 +40,7 @@ export class WalletTransactionService implements WalletTransaction {
         new CustomDomainError("Error while starting transaction process")
       )
     }
-    if (isCustomError(await this.isValidTransaction(transactionId))) {
+    if (!(await this.isValidTransaction(transactionId))) {
       Logger.info(`Transaction #${transactionId} was rejected`)
       return left(new CustomDomainError("Transaction was rejected"))
     }
@@ -55,7 +59,7 @@ export class WalletTransactionService implements WalletTransaction {
       )
       return left(transactionInsert)
     }
-    new SendTransactionMessage().sendMessage(transactionId)
+    this.sendTransactionMessage.sendMessage(transactionId)
     return right(true)
   }
 
@@ -93,11 +97,8 @@ export class WalletTransactionService implements WalletTransaction {
     return new CustomDomainError(errorMessage)
   }
 
-  private async isValidTransaction(
-    transactionId: number
-  ): Promise<void | false> {
-    const fraudService = new FraudCheckService()
-    const result = await fraudService.checkTransaction()
+  private async isValidTransaction(transactionId: number): Promise<boolean> {
+    const result = await this.transactionValidionService.checkTransaction()
     if (!result) {
       await this.walletRepository.updateWalletTransactionState(
         transactionId,
@@ -105,6 +106,7 @@ export class WalletTransactionService implements WalletTransaction {
       )
       return false
     }
+    return true
   }
 
   private async loadTransactionWallets(

@@ -7,6 +7,8 @@ import {
 } from "./types/transactionRequest"
 import { WalletTransactionService } from "@/transaction/application/usecases/walletTransactionService"
 import asyncHandler from "express-async-handler"
+import { SendTransactionMessage } from "../service/sendTransactionMessageMock"
+import { FraudCheckService } from "../service/fraudCheckServiceMock"
 
 export const transactionRouter = Router()
 
@@ -32,7 +34,11 @@ export class TransactionController {
   }
 }
 
-const s = new WalletTransactionService(new WalletRepositoryImpl(connection))
+const s = new WalletTransactionService(
+  new WalletRepositoryImpl(connection),
+  new SendTransactionMessage(),
+  new FraudCheckService()
+)
 
 const walletController = new TransactionController(s)
 
