@@ -1,10 +1,10 @@
-const env = "development"
+const env = process.env.NODE_ENV || "development"
 
 import config from "../../config/knexfile"
 import knex, { Knex } from "knex"
 import { promisify } from "./promisfy"
 
-export const connection = knex(config[env])
+export const connection = knex(config[env as "development" | "production"])
 
 export class DefaultDatasource {
   constructor(private readonly connection: Knex) {}
