@@ -7,7 +7,7 @@
     "test": "NODE_ENV=development jest --verbose --silent",
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
-    "migrate": "knex --knexfile config/knexfile.ts migrate:latest",
+    "migrate": "knex --knexfile config/knexfile.ts --env production migrate:latest",
     "seed": "knex --knexfile config/knexfile.ts seed:run",
     "knex": "knex --knexfile config/knexfile.ts",
     "exec": "ts-node -r tsconfig-paths/register",
