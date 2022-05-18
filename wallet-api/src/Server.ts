@@ -15,6 +15,10 @@ export default class Server {
     })
   }
 
+  getApp() {
+    return this.app
+  }
+
   addRouter(
     router: express.Router | any,
     prefix?: string,

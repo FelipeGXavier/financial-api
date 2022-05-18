@@ -1,16 +1,23 @@
 import { Router } from "express"
 import Server from "./Server"
-import { walletRouter } from "./transaction/infra/web/walletController"
-import { transactionRouter } from "./transaction/infra/web/transactionController"
+import { WalletController } from "./transaction/infra/web/walletController"
 import errorHandler from "./shared/errors/errorHandler"
 import morganMiddleware from "./config/requestLogger"
+import { transactionRoutes, walletRoutes } from "./transaction/infra/web/routes"
+import { TransactionController } from "./transaction/infra/web/transactionController"
+import { transactionServiceInstance } from "./transaction/application/factory/transactionServiceFactory"
+import { loadWalletServiceInstance } from "./transaction/application/factory/loadWalletService"
 
 const baseRouter = Router()
 const server = new Server()
 
 server.addRouter(morganMiddleware)
 
-baseRouter.use("/api", walletRouter, transactionRouter)
+baseRouter.use(
+  "/api",
+  walletRoutes(new WalletController(loadWalletServiceInstance())),
+  transactionRoutes(new TransactionController(transactionServiceInstance()))
+)
 
 baseRouter.get("/ping", (req, res) => {
   return res.send(200)

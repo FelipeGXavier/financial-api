@@ -1,17 +1,9 @@
 import { Request, Router, Response, NextFunction } from "express"
-import { WalletRepositoryImpl } from "@/transaction/infra/persistence/walletRepository"
-import { connection } from "@/shared/defaultDatasource"
 import {
   TransactionRequest,
   TransactionRequestSchema,
 } from "./types/transactionRequest"
 import { WalletTransactionService } from "@/transaction/application/usecases/walletTransactionService"
-import asyncHandler from "express-async-handler"
-import { SendTransactionMessage } from "../service/sendTransactionMessageMock"
-import { FraudCheckService } from "../service/fraudCheckServiceMock"
-
-export const transactionRouter = Router()
-
 export class TransactionController {
   constructor(private readonly transactionService: WalletTransactionService) {}
 
@@ -33,16 +25,3 @@ export class TransactionController {
     res.status(422).json({ success: false, message: result.value.message })
   }
 }
-
-const s = new WalletTransactionService(
-  new WalletRepositoryImpl(connection),
-  new SendTransactionMessage(),
-  new FraudCheckService()
-)
-
-const walletController = new TransactionController(s)
-
-transactionRouter.post(
-  "/transaction",
-  asyncHandler(walletController.transaction)
-)
