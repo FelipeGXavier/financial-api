@@ -1,4 +1,5 @@
 import { app } from "__tests__/config/globalSetupServer"
+import { connection } from "@/shared/defaultDatasource"
 import {
   createSchemaAndMigrate,
   clearAllTables,
@@ -13,6 +14,10 @@ describe("TransactionController", () => {
 
   beforeEach(async () => {
     await clearAllTables()
+  })
+
+  afterAll(async () => {
+    await connection.destroy()
   })
 
   test("GET /ping", async () => {

@@ -3,26 +3,19 @@ import path from "path"
 
 export const createSchemaAndMigrate = async () => {
   await connection.raw(`
-    CREATE OR REPLACE
-    FUNCTION fresh() RETURNS void AS $$  
-
-    BEGIN
-    
-    DROP SCHEMA public CASCADE;
-
-    CREATE SCHEMA public;
-
-    GRANT ALL ON
-    SCHEMA public TO postgres;
-
-    GRANT ALL ON
-    SCHEMA public TO public;
-
-    END;
-
-    $$ LANGUAGE 'plpgsql';
- `)
-  // Recreate schema
+      CREATE OR REPLACE
+      FUNCTION fresh() RETURNS void AS $$
+      BEGIN
+      DROP SCHEMA public CASCADE;
+      CREATE SCHEMA public;
+      GRANT ALL ON
+      SCHEMA public TO postgres;
+      GRANT ALL ON
+      SCHEMA public TO public;
+      END;
+      $$ LANGUAGE 'plpgsql';
+   `)
+  //Recreate schema
   await connection.raw(`SELECT fresh();`)
   // Migrate
   await connection.migrate.latest({
