@@ -1,9 +1,13 @@
 import { app } from "__tests__/config/globalSetupServer"
 import { connection } from "@/shared/defaultDatasource"
 import { randomUUID } from "crypto"
+import { TransactionState } from "@/transaction/domain/transactionState"
 import {
+  getTransactionRecord,
+  getWalletData,
   createSchemaAndMigrate,
   clearAllTables,
+  createUserRetailerWithWallet,
 } from "__tests__/fixture/databaseUtils"
 
 const server = app
@@ -52,5 +56,34 @@ describe("TransactionController", () => {
       expect(result.statusCode).toEqual(400)
       expect(result.body.message).toEqual(badRequestMessage)
     })
+  })
+
+  test("POST /api/transaction - Valid request should return 200", async () => {
+    const userRetailerData = await createUserRetailerWithWallet({
+      userWalletAmount: 100,
+      retailerWalletAmount: 100,
+    })
+    const result = await server.post("/api/transaction").send({
+      payer: userRetailerData.userGuid,
+      payee: userRetailerData.retailerGuid,
+      value: 1,
+    })
+    const transactionRecord = await getTransactionRecord(
+      userRetailerData.userWalletId,
+      userRetailerData.retailerWalletId
+    )
+    const payerWallet = await getWalletData(userRetailerData.userWalletId)
+    const payeeWallet = await getWalletData(userRetailerData.retailerWalletId)
+    // Assert API response
+    expect(result.statusCode).toEqual(200)
+    // Assert create a transaction record with right amount and finished state
+    expect(transactionRecord.length).toEqual(1)
+    expect(transactionRecord[0].amount).toEqual("1")
+    expect(transactionRecord[0].state).toEqual(TransactionState.Finished)
+    // Assert new wallets amount after transaction
+    expect(payerWallet?.amount).toEqual("99")
+    expect(payerWallet?.account_id).toEqual(userRetailerData.userAccountId)
+    expect(payeeWallet?.amount).toEqual("101")
+    expect(payeeWallet?.account_id).toEqual(userRetailerData.retailerAccountId)
   })
 })

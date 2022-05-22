@@ -73,7 +73,7 @@ export class WalletRepositoryImpl implements WalletRepository {
         FROM
           retailers
         WHERE
-          retailers.id = wallets.account_id
+          retailers.account_id = wallets.account_id
         ) > 0 THEN 'retailer'
         ELSE 'user'
       END) AS "account_type"`)

@@ -4,7 +4,9 @@
   "description": "API to handle transactions between users and retailers",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=development jest --verbose",
+    "test:unit": "NODE_ENV=development jest --verbose --silent -- __tests__/unit",
+    "test:integration": "NODE_ENV=development jest --verbose --silent -- __tests__/integration",
+    "test:coverage": "NODE_ENV=development jest --verbose --collect-coverage",
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "migrate": "knex --knexfile config/knexfile.ts --env production migrate:latest",
