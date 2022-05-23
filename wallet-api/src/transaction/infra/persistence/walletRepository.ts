@@ -2,7 +2,7 @@ import { Wallet } from "@/transaction/domain/wallet"
 import { WalletRepository } from "@/transaction/infra/contracts/walletRepository"
 import { Knex } from "knex"
 import { Amount } from "@/transaction/domain/valueobject/amount"
-import { TransactionState } from "../../domain/transactionState"
+import { TransactionState } from "@/transaction/domain/transactionState"
 
 export class WalletRepositoryImpl implements WalletRepository {
   private readonly table = "wallets"
@@ -14,23 +14,23 @@ export class WalletRepositoryImpl implements WalletRepository {
   ): Promise<Wallet | null> {
     const walletContent = await this.connection(this.table)
       .select(
-        "id",
-        "guid",
-        "amount",
-        "account_id",
-        "primary_wallet",
+        "wallets.id",
+        "wallets.guid",
+        "wallets.amount",
+        "wallets.account_id",
+        "wallets.primary_wallet",
         this.connection.raw(`
-      (CASE 
-        WHEN (
-        SELECT
-          count(*)
-        FROM
-          retailers r
-        WHERE
-          r.id = wallets.account_id
-        ) > 0 THEN 'retailer'
-        ELSE 'user'
-      END) AS "account_type"`)
+        (CASE 
+          WHEN (
+          SELECT
+            count(*)
+          FROM
+            retailers
+          WHERE
+            retailers.account_id = wallets.account_id
+          ) > 0 THEN 'retailer'
+          ELSE 'user'
+        END) AS "account_type"`)
       )
       .innerJoin("accounts", "wallets.account_id", "=", "accounts.id")
       .where("account_id", accountId)
@@ -106,7 +106,11 @@ export class WalletRepositoryImpl implements WalletRepository {
         })
         .where("guid", wallet.getGuid())
     }
-    return Promise.reject(0)
+    return this.connection(this.table)
+      .update({
+        amount: wallet.getValue(),
+      })
+      .where("guid", wallet.getGuid())
   }
 
   async saveWalletTransactionRegister(
@@ -114,9 +118,9 @@ export class WalletRepositoryImpl implements WalletRepository {
     payerId: number,
     payeeId: number,
     trx?: Knex.Transaction
-  ): Promise<number | undefined> {
-    return (
-      await this.connection("wallet_transactions")
+  ): Promise<number[] | undefined> {
+    if (trx != null && trx != undefined) {
+      return trx("wallet_transactions")
         .insert({
           amount,
           state: TransactionState.Pending,
@@ -124,7 +128,15 @@ export class WalletRepositoryImpl implements WalletRepository {
           payee_wallet_id: payeeId,
         })
         .returning("id")
-    )[0] as number
+    }
+    return this.connection("wallet_transactions")
+      .insert({
+        amount,
+        state: TransactionState.Pending,
+        payer_wallet_id: payerId,
+        payee_wallet_id: payeeId,
+      })
+      .returning("id")
   }
 
   async updateWalletTransactionState(

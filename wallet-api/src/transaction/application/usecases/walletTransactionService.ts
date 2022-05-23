@@ -28,12 +28,13 @@ export class WalletTransactionService implements WalletTransaction {
     if (isCustomError(walletsOrError)) {
       return left(walletsOrError)
     }
-    const transactionId =
+    const transactionRecord =
       await this.walletRepository.saveWalletTransactionRegister(
         Amount.of(transaction.value).getAmount(),
         walletsOrError.payer.getId(),
         walletsOrError.payee.getId()
       )
+    const transactionId = transactionRecord ? transactionRecord[0] : undefined
     if (!transactionId) {
       Logger.error(`Error while starting transaction ${transaction}`)
       return left(

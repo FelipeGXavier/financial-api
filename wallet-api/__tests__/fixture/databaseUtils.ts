@@ -6,7 +6,7 @@ import { TransactionState } from "@/transaction/domain/transactionState"
 
 export const createSchemaAndMigrate = async () => {
   await connection.raw(`
-      CREATE OR REPLACE
+    CREATE OR REPLACE
       FUNCTION fresh() RETURNS void AS $$
       BEGIN
       DROP SCHEMA public CASCADE;
@@ -15,8 +15,8 @@ export const createSchemaAndMigrate = async () => {
       SCHEMA public TO postgres;
       GRANT ALL ON
       SCHEMA public TO public;
-      END;
-      $$ LANGUAGE 'plpgsql';
+    END;
+    $$ LANGUAGE 'plpgsql';
    `)
   //Recreate schema
   await connection.raw(`SELECT fresh();`)

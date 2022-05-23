@@ -8,6 +8,7 @@ import { Wallet } from "@/transaction/domain/wallet"
 import { FraudCheckService } from "@/transaction/infra/service/fraudCheckServiceMock"
 import { SendTransactionMessage } from "@/transaction/infra/service/sendTransactionMessageMock"
 import { builderWalletUserType } from "__tests__/fixture/builderFixture"
+import { connection } from "@/shared/defaultDatasource"
 
 // Mocks
 const mockWalletRepository = mock<WalletRepository>()
@@ -34,6 +35,11 @@ describe("TransactionService", () => {
     mockReset(mockTransactionMessageHandler)
     mockReset(mockTransactionValidationService)
   })
+
+  afterAll(async () => {
+    await connection.destroy()
+  })
+
   test("Payer wallet not found should return error", async () => {
     setupMockFindWalletMethod(payerGuid, Promise.resolve(null))
     setupMockFindWalletMethod(
@@ -123,7 +129,7 @@ describe("TransactionService", () => {
       Promise.resolve(false)
     )
     mockWalletRepository.saveWalletTransactionRegister.mockReturnValue(
-      Promise.resolve(1)
+      Promise.resolve([1])
     )
     // Execute
     const result = await transactionService.walletTransaction(input)
@@ -148,7 +154,7 @@ describe("TransactionService", () => {
       Promise.resolve(true)
     )
     mockWalletRepository.saveWalletTransactionRegister.mockReturnValue(
-      Promise.resolve(1)
+      Promise.resolve([1])
     )
     // Execute
     const result = await transactionService.walletTransaction(input)
@@ -173,7 +179,7 @@ describe("TransactionService", () => {
       Promise.resolve(true)
     )
     mockWalletRepository.saveWalletTransactionRegister.mockReturnValue(
-      Promise.resolve(1)
+      Promise.resolve([1])
     )
     // Execute
     const result = await transactionService.walletTransaction(input)
@@ -196,7 +202,7 @@ describe("TransactionService", () => {
       Promise.resolve(true)
     )
     mockWalletRepository.saveWalletTransactionRegister.mockReturnValue(
-      Promise.resolve(1)
+      Promise.resolve([1])
     )
     mockWalletRepository.updateWalletAmount.mockReturnValue(Promise.resolve(1))
     const result = await transactionService.walletTransaction(input)

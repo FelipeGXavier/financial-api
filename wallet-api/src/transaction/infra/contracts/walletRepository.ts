@@ -16,7 +16,7 @@ export interface WalletRepository {
     payerId: number,
     payeeId: number,
     trx?: Knex.Transaction
-  ) => Promise<number | undefined>
+  ) => Promise<number[] | undefined>
   updateWalletTransactionState: (
     transactionId: number,
     state: TransactionState,
