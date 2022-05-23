@@ -127,7 +127,6 @@ export class WalletTransactionService implements WalletTransaction {
     if (!payeeWallet) {
       return new CustomDomainError("Payee wallet not found")
     }
-    // console.log(payerWallet, payeeWallet)
     if (payerWallet.walletOwnerIsRetailer()) {
       return new CustomDomainError("Payer must not be a retailer")
     }

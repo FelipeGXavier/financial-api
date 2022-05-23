@@ -86,4 +86,101 @@ describe("TransactionController", () => {
     expect(payeeWallet?.amount).toEqual("101")
     expect(payeeWallet?.account_id).toEqual(userRetailerData.retailerAccountId)
   })
+
+  test("POST /api/transaction - Payer without necessary amount should return 422", async () => {
+    const userRetailerData = await createUserRetailerWithWallet({
+      userWalletAmount: 100,
+      retailerWalletAmount: 100,
+    })
+    const result = await server.post("/api/transaction").send({
+      payer: userRetailerData.userGuid,
+      payee: userRetailerData.retailerGuid,
+      value: 101,
+    })
+    const transactionRecord = await getTransactionRecord(
+      userRetailerData.userWalletId,
+      userRetailerData.retailerWalletId
+    )
+    const payerWallet = await getWalletData(userRetailerData.userWalletId)
+    const payeeWallet = await getWalletData(userRetailerData.retailerWalletId)
+    // Assert API response
+    expect(result.statusCode).toEqual(422)
+    expect(result.body.message).toEqual(
+      "Payer doesn't have the necessary amount to exchange"
+    )
+    // Assert create a transaction record with right amount and failed state
+    expect(transactionRecord.length).toEqual(1)
+    expect(transactionRecord[0].amount).toEqual("101")
+    expect(transactionRecord[0].state).toEqual(TransactionState.Failed)
+    // Assert new wallets amount after transaction
+    expect(payerWallet?.amount).toEqual("100")
+    expect(payerWallet?.account_id).toEqual(userRetailerData.userAccountId)
+    expect(payeeWallet?.amount).toEqual("100")
+    expect(payeeWallet?.account_id).toEqual(userRetailerData.retailerAccountId)
+  })
+
+  test("POST /api/transaction - Payer or payee wallet not found should return 422", async () => {
+    const fakePayeeGuid = randomUUID()
+    const fakePayerGuid = randomUUID()
+    const userRetailerData = await createUserRetailerWithWallet({
+      userWalletAmount: 100,
+      retailerWalletAmount: 100,
+    })
+    const resultPayerNotFound = await server.post("/api/transaction").send({
+      payer: fakePayerGuid,
+      payee: userRetailerData.retailerGuid,
+      value: 1,
+    })
+    const resultPayeeNotFound = await server.post("/api/transaction").send({
+      payer: userRetailerData.userGuid,
+      payee: fakePayeeGuid,
+      value: 1,
+    })
+    const transactionRecord = await getTransactionRecord(
+      userRetailerData.userWalletId,
+      userRetailerData.retailerWalletId
+    )
+    const payerWallet = await getWalletData(userRetailerData.userWalletId)
+    const payeeWallet = await getWalletData(userRetailerData.retailerWalletId)
+    // Assert API response
+    expect(resultPayerNotFound.statusCode).toEqual(422)
+    expect(resultPayerNotFound.body.message).toEqual("Payer wallet not found")
+    expect(resultPayeeNotFound.statusCode).toEqual(422)
+    expect(resultPayeeNotFound.body.message).toEqual("Payee wallet not found")
+    // Assert transaction record wasn't created
+    expect(transactionRecord.length).toEqual(0)
+    // Assert new wallets amount after transaction
+    expect(payerWallet?.amount).toEqual("100")
+    expect(payerWallet?.account_id).toEqual(userRetailerData.userAccountId)
+    expect(payeeWallet?.amount).toEqual("100")
+    expect(payeeWallet?.account_id).toEqual(userRetailerData.retailerAccountId)
+  })
+
+  test("POST /api/transaction - Trying transaction with retailer as payer should return 422", async () => {
+    const userRetailerData = await createUserRetailerWithWallet({
+      userWalletAmount: 100,
+      retailerWalletAmount: 100,
+    })
+    const result = await server.post("/api/transaction").send({
+      payer: userRetailerData.retailerGuid,
+      payee: userRetailerData.userGuid,
+      value: 1,
+    })
+    const transactionRecord = await getTransactionRecord(
+      userRetailerData.userWalletId,
+      userRetailerData.retailerWalletId
+    )
+    const payerWallet = await getWalletData(userRetailerData.userWalletId)
+    const payeeWallet = await getWalletData(userRetailerData.retailerWalletId)
+    // Assert API response
+    expect(result.statusCode).toEqual(422)
+    expect(result.body.message).toEqual("Payer must not be a retailer")
+    // Assert transaction record wasn't created
+    expect(transactionRecord.length).toEqual(0)
+    // Assert new wallets amount after transaction
+    expect(payerWallet?.amount).toEqual("100")
+    expect(payerWallet?.account_id).toEqual(userRetailerData.userAccountId)
+    expect(payeeWallet?.amount).toEqual("100")
+    expect(payeeWallet?.account_id).toEqual(userRetailerData.retailerAccountId)
+  })
 })
