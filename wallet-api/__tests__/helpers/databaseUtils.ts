@@ -50,6 +50,8 @@ type UserRetailerData = {
   retailerAccountId: number
   userWalletId: number
   retailerWalletId: number
+  userWalletGuid: string
+  retailerWalletGuid: string
 }
 
 export const createUserRetailerWithWallet = async (walletAmounts: {
@@ -89,30 +91,32 @@ export const createUserRetailerWithWallet = async (walletAmounts: {
     account_id: retailerAccountId.id,
   })
   const userWalletId = (
-    (await connection("wallets")
+    await connection("wallets")
       .insert({
         account_id: userAccountId.id,
         primary_wallet: true,
         amount: walletAmounts.userWalletAmount,
       })
-      .returning("id")) as number[]
-  )[0]
+      .returning(["id", "guid"])
+  )[0] as { id: number; guid: string }
   const retailerWalletId = (
-    (await connection("wallets")
+    await connection("wallets")
       .insert({
         account_id: retailerAccountId.id,
         primary_wallet: true,
         amount: walletAmounts.retailerWalletAmount,
       })
-      .returning("id")) as number[]
-  )[0]
+      .returning(["id", "guid"])
+  )[0] as { id: number; guid: string }
   return {
     userGuid: userAccountId.guid,
     userAccountId: userAccountId.id,
     retailerGuid: retailerAccountId.guid,
     retailerAccountId: retailerAccountId.id,
-    userWalletId,
-    retailerWalletId,
+    userWalletId: userWalletId.id,
+    retailerWalletId: retailerAccountId.id,
+    userWalletGuid: userWalletId.guid,
+    retailerWalletGuid: userWalletId.guid,
   }
 }
 
