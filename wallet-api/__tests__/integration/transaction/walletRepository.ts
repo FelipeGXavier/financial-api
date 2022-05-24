@@ -11,6 +11,7 @@ import {
   createUserRetailerWithWallet,
   getTransactionRecord,
 } from "__tests__/helpers/databaseUtils"
+import { headOrUndefined } from "@/shared/util"
 
 const walletRepository: WalletRepository = new WalletRepositoryImpl(connection)
 
@@ -144,15 +145,14 @@ describe("WalletRepository", () => {
       userWalletAmount: 999,
       retailerWalletAmount: 1,
     })
-    expect(
-      (
-        await walletRepository.saveWalletTransactionRegister(
-          999,
-          userRetailerData.userAccountId,
-          userRetailerData.retailerAccountId
-        )
-      )?.length
-    ).toEqual(1)
+    const transactionId = headOrUndefined(
+      await walletRepository.saveWalletTransactionRegister(
+        999,
+        userRetailerData.userAccountId,
+        userRetailerData.retailerAccountId
+      )
+    )
+    expect(transactionId).toBeGreaterThan(0)
     const transactionRecord = await getTransactionRecord(
       userRetailerData.userWalletId,
       userRetailerData.retailerWalletId
@@ -167,16 +167,15 @@ describe("WalletRepository", () => {
       userWalletAmount: 999,
       retailerWalletAmount: 1,
     })
-    expect(
-      (
-        await walletRepository.saveWalletTransactionRegister(
-          999,
-          userRetailerData.userAccountId,
-          userRetailerData.retailerAccountId,
-          trx
-        )
-      )?.length
-    ).toEqual(1)
+    const transactionId = headOrUndefined(
+      await walletRepository.saveWalletTransactionRegister(
+        999,
+        userRetailerData.userAccountId,
+        userRetailerData.retailerAccountId,
+        trx
+      )
+    )
+    expect(transactionId).toBeGreaterThan(0)
     await trx.rollback()
     const transactionRecord = await getTransactionRecord(
       userRetailerData.userWalletId,
@@ -190,37 +189,35 @@ describe("WalletRepository", () => {
       userWalletAmount: 999,
       retailerWalletAmount: 1,
     })
-    const transactionId = (
-      (await walletRepository.saveWalletTransactionRegister(
+    const transactionId = headOrUndefined(
+      await walletRepository.saveWalletTransactionRegister(
         999,
         userRetailerData.userAccountId,
         userRetailerData.retailerAccountId
-      )) as number[]
-    )[0]
+      )
+    )
     await walletRepository.updateWalletTransactionState(
-      transactionId,
+      transactionId as number,
       TransactionState.Finished
     )
-    expect(
-      (
-        await getTransactionRecord(
-          userRetailerData.userWalletId,
-          userRetailerData.retailerWalletId
-        )
-      )[0].state
-    ).toEqual(TransactionState.Finished)
+    const tranasctionRecordFinished = headOrUndefined(
+      await getTransactionRecord(
+        userRetailerData.userWalletId,
+        userRetailerData.retailerWalletId
+      )
+    )
+    expect(tranasctionRecordFinished?.state).toEqual(TransactionState.Finished)
     await walletRepository.updateWalletTransactionState(
-      transactionId,
+      transactionId as number,
       TransactionState.Rejected
     )
-    expect(
-      (
-        await getTransactionRecord(
-          userRetailerData.userWalletId,
-          userRetailerData.retailerWalletId
-        )
-      )[0].state
-    ).toEqual(TransactionState.Rejected)
+    const tranasctionRecordRejected = headOrUndefined(
+      await getTransactionRecord(
+        userRetailerData.userWalletId,
+        userRetailerData.retailerWalletId
+      )
+    )
+    expect(tranasctionRecordRejected?.state).toEqual(TransactionState.Rejected)
   })
 
   test("updateWalletTransactionState should respect database transaction context when provided", async () => {
@@ -229,26 +226,25 @@ describe("WalletRepository", () => {
       userWalletAmount: 999,
       retailerWalletAmount: 1,
     })
-    const transactionId = (
-      (await walletRepository.saveWalletTransactionRegister(
+    const transactionId = headOrUndefined(
+      await walletRepository.saveWalletTransactionRegister(
         999,
         userRetailerData.userAccountId,
         userRetailerData.retailerAccountId
-      )) as number[]
-    )[0]
+      )
+    )
     await walletRepository.updateWalletTransactionState(
-      transactionId,
+      transactionId as number,
       TransactionState.Rejected,
       trx
     )
     await trx.rollback()
-    expect(
-      (
-        await getTransactionRecord(
-          userRetailerData.userWalletId,
-          userRetailerData.retailerWalletId
-        )
-      )[0].state
-    ).toEqual(TransactionState.Pending)
+    const tranasctionRecord = headOrUndefined(
+      await getTransactionRecord(
+        userRetailerData.userWalletId,
+        userRetailerData.retailerWalletId
+      )
+    )
+    expect(tranasctionRecord?.state).toEqual(TransactionState.Pending)
   })
 })

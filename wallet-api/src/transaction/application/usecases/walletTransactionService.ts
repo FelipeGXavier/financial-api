@@ -9,7 +9,7 @@ import { Wallet } from "@/transaction/domain/wallet"
 import { PayeePayerNewWallet } from "@/transaction/domain/wallet"
 import { Knex } from "knex"
 import { TransactionState } from "@/transaction/domain/transactionState"
-import { isCustomError } from "@/shared/util"
+import { isCustomError, headOrUndefined } from "@/shared/util"
 import { FraudCheckService } from "@/transaction/infra/service/fraudCheckServiceMock"
 import { SendTransactionMessage } from "@/transaction/infra/service/sendTransactionMessageMock"
 import Logger from "@/shared/logger"
@@ -28,13 +28,13 @@ export class WalletTransactionService implements WalletTransaction {
     if (isCustomError(walletsOrError)) {
       return left(walletsOrError)
     }
-    const transactionRecord =
+    const transactionId = headOrUndefined(
       await this.walletRepository.saveWalletTransactionRegister(
         Amount.of(transaction.value).getAmount(),
         walletsOrError.payer.getId(),
         walletsOrError.payee.getId()
       )
-    const transactionId = transactionRecord ? transactionRecord[0] : undefined
+    )
     if (!transactionId) {
       Logger.error(`Error while starting transaction ${transaction}`)
       return left(
