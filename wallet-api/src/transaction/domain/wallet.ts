@@ -83,6 +83,10 @@ export class Wallet {
     return this.id
   }
 
+  public isPrimaryWallet(): boolean {
+    return this.primaryWallet
+  }
+
   public walletOwnerIsRetailer(): boolean {
     return this.accountType == AccountType.Retailer
   }

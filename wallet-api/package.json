@@ -10,9 +10,9 @@
     "test:coverage": "NODE_ENV=development jest --verbose --collect-coverage --runInBand",
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
-    "migrate": "knex --knexfile config/knexfile.ts --env production migrate:latest",
-    "seed": "knex --knexfile config/knexfile.ts seed:run",
-    "knex": "knex --knexfile config/knexfile.ts",
+    "migrate": "NODE_ENV=production knex --knexfile config/knexfile.ts --env production migrate:latest",
+    "seed": "NODE_ENV=production knex --knexfile config/knexfile.ts seed:run",
+    "knex": "NODE_ENV=production knex --knexfile config/knexfile.ts",
     "exec": "ts-node -r tsconfig-paths/register",
     "start": "NODE_ENV=production ts-node -r tsconfig-paths/register src/index.ts"
   },

@@ -4,16 +4,18 @@ import { AccountRepository } from "@/customer/infra/contracts/accountRepository"
 import { WalletRepository } from "@/transaction/infra/contracts/walletRepository"
 import { Either, left, right } from "@/shared/either"
 import { CustomDomainError } from "@/shared/errors/customError"
+import { WalletDataResponse } from "@/transaction/infra/web/types/out/walletDataResponse"
 
 export class LoadWalletService implements LoadWallet {
   constructor(
     private readonly accountRepository: AccountRepository,
-    private readonly walletRepository: WalletRepository
+    private readonly walletRepository: WalletRepository,
+    private readonly presenter: (wallet: Wallet) => WalletDataResponse
   ) {}
 
-  async loadWalletByAccountId(
+  async loadWalletByAccountGuid(
     accountGuid: string
-  ): Promise<Either<CustomDomainError, Wallet>> {
+  ): Promise<Either<CustomDomainError, WalletDataResponse>> {
     const user = await this.accountRepository.findAccountByGuid(accountGuid)
     if (!user) {
       return left(new CustomDomainError("User not found from given user guid"))
@@ -26,10 +28,6 @@ export class LoadWalletService implements LoadWallet {
         new CustomDomainError("Primary wallet not found from given user guid")
       )
     }
-    return right(wallet)
-  }
-
-  loadWalletById(accountGuid: string, walletGuid: string): Promise<Wallet> {
-    return Promise.reject(null)
+    return right(this.presenter(wallet))
   }
 }

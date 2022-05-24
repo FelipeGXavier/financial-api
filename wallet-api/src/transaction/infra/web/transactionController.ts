@@ -1,9 +1,10 @@
-import { Request, Router, Response, NextFunction } from "express"
+import { Request, Response } from "express"
+
+import { WalletTransactionService } from "@/transaction/application/usecases/walletTransactionService"
 import {
   TransactionRequest,
   TransactionRequestSchema,
-} from "./types/transactionRequest"
-import { WalletTransactionService } from "@/transaction/application/usecases/walletTransactionService"
+} from "@/transaction/infra/web/types/in/transactionRequest"
 export class TransactionController {
   constructor(private readonly transactionService: WalletTransactionService) {}
 

@@ -1,4 +1,3 @@
-import { TransactionRequest } from "@/transaction/infra/web/types/transactionRequest"
 import { WalletTransaction } from "@/transaction/application/contracts/walletTransaction"
 import { WalletRepository } from "@/transaction/infra/contracts/walletRepository"
 import { Either, left, right } from "@/shared/either"
@@ -13,6 +12,7 @@ import { isCustomError, headOrUndefined } from "@/shared/util"
 import { FraudCheckService } from "@/transaction/infra/service/fraudCheckServiceMock"
 import { SendTransactionMessage } from "@/transaction/infra/service/sendTransactionMessageMock"
 import Logger from "@/shared/logger"
+import { TransactionRequest } from "@/transaction/infra/web/types/in/transactionRequest"
 
 export class WalletTransactionService implements WalletTransaction {
   constructor(

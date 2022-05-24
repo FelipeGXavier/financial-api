@@ -1,10 +1,9 @@
 import { Either } from "@/shared/either"
-import { Wallet } from "@/transaction/domain/wallet"
 import { CustomDomainError } from "@/shared/errors/customError"
+import { WalletDataResponse } from "@/transaction/infra/web/types/out/walletDataResponse"
 
 export interface LoadWallet {
-  loadWalletByAccountId: (
+  loadWalletByAccountGuid: (
     accountGuid: string
-  ) => Promise<Either<CustomDomainError, Wallet>>
-  loadWalletById: (accountGuid: string, walletGuid: string) => Promise<Wallet>
+  ) => Promise<Either<CustomDomainError, WalletDataResponse>>
 }
