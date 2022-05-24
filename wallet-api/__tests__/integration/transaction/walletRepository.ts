@@ -10,7 +10,7 @@ import {
   createSchemaAndMigrate,
   createUserRetailerWithWallet,
   getTransactionRecord,
-} from "__tests__/fixture/databaseUtils"
+} from "__tests__/helpers/databaseUtils"
 
 const walletRepository: WalletRepository = new WalletRepositoryImpl(connection)
 

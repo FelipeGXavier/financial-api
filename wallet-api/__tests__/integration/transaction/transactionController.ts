@@ -8,7 +8,7 @@ import {
   createSchemaAndMigrate,
   clearAllTables,
   createUserRetailerWithWallet,
-} from "__tests__/fixture/databaseUtils"
+} from "__tests__/helpers/databaseUtils"
 
 const server = app
 

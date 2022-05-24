@@ -2,7 +2,7 @@ import { Amount } from "@/transaction/domain/valueobject/amount"
 import { PayeePayerNewWallet, Wallet } from "@/transaction/domain/wallet"
 import { AccountType } from "@/customer/domain/accountType"
 import { CustomDomainError } from "@/shared/errors/customError"
-import { builderWalletUserType } from "../../fixture/builderFixture"
+import { builderWalletUserType } from "__tests__/helpers/builderFixture"
 
 describe("Wallet entity", () => {
   test("Wallet owner type match own state", () => {

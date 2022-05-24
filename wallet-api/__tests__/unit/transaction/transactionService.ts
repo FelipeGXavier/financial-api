@@ -7,7 +7,7 @@ import { AccountType } from "@/customer/domain/accountType"
 import { Wallet } from "@/transaction/domain/wallet"
 import { FraudCheckService } from "@/transaction/infra/service/fraudCheckServiceMock"
 import { SendTransactionMessage } from "@/transaction/infra/service/sendTransactionMessageMock"
-import { builderWalletUserType } from "__tests__/fixture/builderFixture"
+import { builderWalletUserType } from "__tests__/helpers/builderFixture"
 import { connection } from "@/shared/defaultDatasource"
 
 // Mocks
